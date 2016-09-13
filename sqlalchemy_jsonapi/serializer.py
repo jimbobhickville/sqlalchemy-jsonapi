@@ -214,6 +214,7 @@ class JSONAPI(object):
 
     default_options = {
         'dasherize': True,
+        'include_fk_columns': False,
     }
 
     def __init__(self, base, prefix='', options=None):
@@ -380,8 +381,11 @@ class JSONAPI(object):
             local_fields = orm_desc_keys
 
         for key, relationship in instance.__mapper__.relationships.items():
-            attrs_to_ignore |= set([c.name for c in relationship.local_columns
-                                    ]) | {key}
+            if self.options['include_fk_columns']:
+                attrs_to_ignore |= {key}
+            else:
+                attrs_to_ignore |= set([c.name for c in relationship.local_columns
+                                        ]) | {key}
 
             api_key = instance.__jsonapi_map_to_api__[key]
 

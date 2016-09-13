@@ -1022,8 +1022,15 @@ class JSONAPI(object):
                         to_relate = self._fetch_resource(
                             session, data_rel['type'], data_rel['id'],
                             Permissions.EDIT)
-                        rem = to_relate.__mapper__.relationships[remote_side]
-                        if rem.direction == MANYTOONE:
+
+                        try:
+                            rem = to_relate.__mapper__.relationships[remote_side]
+                            rem_direction = rem.direction
+                        except KeyError:
+                            # no back_populates, assume MANYTOONE
+                            rem_direction = MANYTOONE
+
+                        if rem_direction == MANYTOONE:
                             check_permission(to_relate, remote_side,
                                              Permissions.EDIT)
                         else:
